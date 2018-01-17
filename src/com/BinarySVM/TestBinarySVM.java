@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.junit.Test;
+
 import com.fileInputOutput.InvalidInputDataException;
 import com.fileInputOutput.Parameter;
 import com.fileInputOutput.Problem;
