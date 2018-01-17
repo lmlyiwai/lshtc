@@ -65,15 +65,16 @@ public class RefinedExpert {
 		
 		getWeight();
 		double[][] ts = transformSamples();
+		scale(ts);
 		this.trainpv = ts;
 		this.extendy = this.prob.y;
 		double[][] performance = new double[this.k.length][];
 		double[][] testperf = new double[this.k.length][];
 		for (int i = 0; i < performance.length; i++) {
-System.out.println("Start training...");
+//System.out.println("Start training...");
 long startTime = System.currentTimeMillis();
 			performance[i] = leaveOneOut(ts, k[i]);
-System.out.println("Start predicting...");
+//System.out.println("Start predicting...");
 			testperf[i] = predict(test, (int)k[i]);
 long endTime = System.currentTimeMillis();
 System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df.format(performance[i][0]) + 
@@ -85,6 +86,39 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 		"\n");
 		}
 	}
+	
+	/**
+	 * 中间样本加入高斯噪声
+	 */
+	public void trainAndTestWithNoise(Problem test) {
+		if (this.prob == null || this.param == null || this.k == null) {
+			return;
+		}
+		
+		getWeight();
+		double[][] ts = transformSamples();
+		scale(ts);
+		this.trainpv = ts;
+		this.extendy = this.prob.y;
+		double[][] performance = new double[this.k.length][];
+		double[][] testperf = new double[this.k.length][];
+		for (int i = 0; i < performance.length; i++) {
+//System.out.println("Start training...");
+long startTime = System.currentTimeMillis();
+			performance[i] = leaveOneOut(ts, k[i]);
+//System.out.println("Start predicting...");
+			testperf[i] = predict(test, (int)k[i]);
+long endTime = System.currentTimeMillis();
+System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df.format(performance[i][0]) + 
+		", MaF1 = " + df.format(performance[i][1]) + ", HamLoss = " + df.format(performance[i][2]) +
+		", 0/1 loss = " + df.format(performance[i][3]) + 
+		", mif1 = " + df.format(testperf[i][0]) + ", maf1 = " + df.format(testperf[i][1]) + 
+		", HamLoss = " + df.format(testperf[i][2]) +
+		", 0/l loss = " + df.format(testperf[i][3]) + 
+		"\n");
+		}
+	}
+	
 	
 	/**
 	 * 
@@ -159,6 +193,7 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 		}
 		
 		double[][] ts = transformSamples();
+		scale(ts);
 		double[][] performance = new double[this.k.length][];
 		this.trainpv = ts;
 		this.extendy = this.prob.y;
@@ -192,7 +227,8 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 			}
 			int[] index = Sort.getIndexBeforeSort(distance);
 			int[][] fkl = getFirstKlabel(this.extendy, index, (int)k, false);
-			predictedLabel[i] = getLabel(fkl);
+			predictedLabel[i] = getLabel(fkl);                     //multi label
+//			predictedLabel[i] = getLabelMax(fkl);              //single label
 		}
 		
 		double microf1 = Measures.microf1(this.uniqueLabels, this.extendy, predictedLabel);
@@ -515,6 +551,7 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 		}
 		
 		double[][] pv = transTestSamples(test.x);
+		scale(pv);
 		int[][] predictedLabel = new int[test.l][];
 		for (int i = 0; i < predictedLabel.length; i++) {
 			double[] samplei = pv[i];
@@ -525,7 +562,8 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 			}
 			int[] index = Sort.getIndexBeforeSort(distance);
 			int[][] fkl = getFirstKlabel(this.extendy, index, (int)k, true);
-			predictedLabel[i] = getLabel(fkl);
+			predictedLabel[i] = getLabel(fkl);											//多类标
+//			predictedLabel[i] = getLabelMax(fkl);                                  //单类标
 		}
 		
 		double mif1 = Measures.microf1(this.uniqueLabels, test.y, predictedLabel);
@@ -625,5 +663,26 @@ System.out.print("c = " + this.param.getC() + ", k = " + k[i] + ", MiF1 = " + df
 			}
 		}
 		return testPredictValues;
+	}
+	
+	/**
+	 * 将输入数组的每一行模长归一化为1
+	 * @param mat二维数组
+	 */
+	private void scale(double[][] mat) {
+		if (mat == null) {
+			return;
+		}
+		
+		for (int i = 0; i < mat.length; i++) {
+			double inp = SparseVector.innerProduct(mat[i], mat[i]);
+			double norm = Math.sqrt(inp);
+			
+			for (int j  = 0; j < mat[i].length; j++) {
+				if (mat[i] != null && mat[i][j] != Double.NaN) {
+					mat[i][j] = mat[i][j] / norm;
+				} 
+			}
+		}
 	}
 }

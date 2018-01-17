@@ -28,17 +28,17 @@ public class TestRCV1 {
 		Problem train = Problem.readProblem(new File(trainfile), 1);
 		train.y = FileInputOutput.getLabel(train.y, id2label);
 		
-//		double[] k = {3, 5, 7, 11, 15, 21, 31, 41, 51};
-//		double[] c = new double[15];
-//		for (int i = 0; i < c.length; i++) {
-//			c[i] = Math.pow(2, i - 7);
-//		}
-//		RefinedExpert re = null;
-//		for (int i = 0; i < c.length; i++) {
-//			Parameter param = new Parameter(c[i], 1000, 0.001);
-//			re = new RefinedExpert(train, param, k, 10, RefinedExpert.MICROF1);
-//			re.train();
-//		}
+		double[] k = {1, 3, 5, 7, 11, 15, 21, 31, 41, 51};
+		double[] c = new double[15];
+		for (int i = 0; i < c.length; i++) {
+			c[i] = Math.pow(2, i - 7);
+		}
+		RefinedExpert re = null;
+		for (int i = 0; i < c.length; i++) {
+			Parameter param = new Parameter(c[i], 1000, 0.001);
+			re = new RefinedExpert(train, param, k, 10, RefinedExpert.MICROF1);
+			re.train();
+		}
 		
 		Problem p0 = Problem.readProblem(new File(test0), 1);
 		Problem p1 = Problem.readProblem(new File(test1), 1);
@@ -74,10 +74,10 @@ public class TestRCV1 {
 			index++;
 		}
 		p.y = FileInputOutput.getLabel(p.y, id2label);
-		double[] k = {3};
+		double[] ks = {3};
 		Parameter param = new Parameter(1, 1000, 0.001);
-		RefinedExpert re = new RefinedExpert(train, param, k, 10, RefinedExpert.MICROF1);
-		re.trainAndTest(p);
+		RefinedExpert res = new RefinedExpert(train, param, ks, 10, RefinedExpert.MICROF1);
+		res.trainAndTest(p);
 	}
 
 }

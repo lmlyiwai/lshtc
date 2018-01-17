@@ -12,10 +12,26 @@ import com.fileInputOutput.Parameter;
 import com.fileInputOutput.Problem;
 import com.structure.Structure;
 
-public class TestRefinedExpert {
+public class RefindeExpertTest {
 
+	/**
+	 * 原始样本进交叉验证变换为新样本。用于训练支持向量机的样本不会再经过该支持向量机输出预测结果。 
+	 */
 	@Test
 	public void test() throws IOException, InvalidInputDataException {
+		int[] fold = {5, 10, 15, 20, 25, 30 };
+		for (int i = 0; i < fold.length; i++) {
+			System.out.println("fold = " + fold[i]);
+			trainTest(fold[i]);
+		}
+	}
+
+	/**
+	 * @throws InvalidInputDataException 
+	 * @throws IOException 
+	 * 
+	 */
+	public void trainTest(int fold) throws IOException, InvalidInputDataException {
 		String filename = "F:\\DataSets\\imclef07\\imclef07a\\imclef07a\\imclef07a_train.hf";
 		String trainfile = "F:\\DataSets\\imclef07\\imclef07a\\imclef07a\\imclef07a_train";
 		String testfile = "F:\\DataSets\\imclef07\\imclef07a\\imclef07a\\imclef07a_test";
@@ -44,9 +60,8 @@ public class TestRefinedExpert {
 		
 		for (int i = 0; i < cs.length; i++) {
 			param.setC(cs[i]);
-			RefinedExpert fe = new RefinedExpert(train, param, k, 30, RefinedExpert.MICROF1);
-			fe.trainAndTestExtend(test);
+			RefinedExpert fe = new RefinedExpert(train, param, k, fold, RefinedExpert.MICROF1);
+			fe.trainAndTest(test);
 		}
 	}
-
 }

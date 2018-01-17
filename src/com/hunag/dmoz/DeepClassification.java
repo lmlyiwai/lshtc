@@ -122,6 +122,6 @@ System.out.println(label);
 	 * º∆À„Bernouli Model
 	 */
 	private Map<Integer, Double> getBernouliClassTheta(int label, double numOfClass) {
-		
+		return null;
 	}
 }

@@ -51,25 +51,19 @@ public class TestOneVsAllCLEF {
 			rs.gridSerach(prob, param, 5, tc, K);
 		}
 		
-		param.setC(1);
+		param.setC(2);
 		DataPoint[][] w = rs.train(prob, param);
 		
 		Problem testprob = Problem.readProblem(new File(testfile), 1, map);
 		testprob.y = ProcessIMCLEF.pathToLeaf(testprob.y, leaves);
 		
 		double[][] trainpv = rs.predictValues(w, prob.x);
-//		rs.scale(trainpv);
+		rs.scale(trainpv);
 		
 		double[][] testpv = rs.predictValues(w, testprob.x);
-//		rs.scale(testpv);
+		rs.scale(testpv);
 		
-		int[][] pre = rs.predictNear(trainpv, testpv, prob.y, 1);
-		for(int i = 0; i < pre.length; i++) {
-			for(int j = 0; j < pre[i].length; j++) {
-				System.out.print(pre[i][j] + " ");
-			}
-			System.out.println();
-		}
+		int[][] pre = rs.predictNear(trainpv, testpv, prob.y, 5);
 		
 		double microf1 = Measures.microf1(rs.getUniqueLabels(), testprob.y, pre);
 		double macrof1 = Measures.macrof1(rs.getUniqueLabels(), testprob.y, pre);

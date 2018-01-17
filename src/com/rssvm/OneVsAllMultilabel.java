@@ -859,7 +859,8 @@ public class OneVsAllMultilabel {
 				int[] ind = Sort.getIndexBeforeSort(dis);
 				for(int m = 0; m < k.length; m++) {
 					int[][] ty = getFirstKY(ind, train.y, k[m]);
-					int[] tpy = voteLabel(ty);
+//					int[] tpy = voteLabel(ty);						//多类标
+					int[] tpy = sigleLabel(ty); 						//单类标
 					temppre[m][h] = tpy;
 				}
 			}
