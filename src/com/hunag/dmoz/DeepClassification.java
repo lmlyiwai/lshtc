@@ -12,6 +12,7 @@ import com.fileInputOutput.Problem;
 import com.refinedExpert.Tools;
 import com.sparseVector.DataPoint;
 import com.sparseVector.SparseVector;
+import com.tools.Sort;
 
 public class DeepClassification {
 	private Problem train;
@@ -124,4 +125,44 @@ System.out.println(label);
 	private Map<Integer, Double> getBernouliClassTheta(int label, double numOfClass) {
 		return null;
 	}
+	
+	/**
+	 * 简略预测，TopN个标签中是否包含真实类别
+	 */
+	public void predict(Problem test) {
+		if (test == null) {
+			return;
+		}
+		double count = 0;
+		System.out.print("n = " + this.topn);
+		for (int i = 0; i < test.l; i++) {
+//System.out.print(i);
+long start = System.currentTimeMillis();
+			normalizeTF(test.x[i]);
+			double[] cos = new double[this.classCenters.length];
+			for (int j = 0; j < this.classCenters.length; j++) {
+				cos[j] = cosine(test.x[i], this.classCenters[j]);
+			}
+			int[] index = Sort.getIndexBeforeSort(cos);
+			int[] topnlabel = new int[this.topn];
+			for (int j = 0; j < this.topn; j++) {
+				topnlabel[j] = this.ulabels[index[j]];
+			}
+			if(Tools.isContain(topnlabel, test.y[i][0])) {
+				count++;
+			}
+long end = System.currentTimeMillis();
+//System.out.println(", time = " + (end - start));
+		}
+		System.out.println(", accuracy = " + (count / test.l));
+	}
+
+	public int getTopn() {
+		return topn;
+	}
+
+	public void setTopn(int topn) {
+		this.topn = topn;
+	}
+	
 }

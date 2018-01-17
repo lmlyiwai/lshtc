@@ -11,10 +11,16 @@ public class DeepClassificationTest {
 	@Test
 	public void test() throws IOException {
 		String trainfile = "F:\\DataSets\\dmoz2010\\train.txt";
+		String validfile = "F:\\DataSets\\dmoz2010\\validation.txt";
+		int[] topn = {10, 20, 30, 40, 50, 100, 200, 300, 400, 500};
 		Problem train = FileIO.readProblem(trainfile, -1);
+		Problem valid = FileIO.readProblem(validfile, -1);
 		DeepClassification dc = new DeepClassification(train, 10);
 		dc.getClassCenter();
-		System.out.println();
+		for (int i = 0; i < topn.length; i++) {
+			int tn = topn[i];
+			dc.setTopn(tn);
+			dc.predict(valid);
+		}
 	}
-
 }

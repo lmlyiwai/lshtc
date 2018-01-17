@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.crypto.Data;
+import java.util.Set;
 
 import com.fileInputOutput.Problem;
 import com.sparseVector.DataPoint;
@@ -230,5 +232,79 @@ public class FileIO {
 			dp[i-1] = new DataPoint(index, value);
 		}
 		return dp;
+	}
+	
+	/**
+	 * @param probs
+	 * 这里是为了处理DMOZ数据集，DMOZ数据集里index可能有冗余，
+	 * 将冗余去除并为其分配新的index
+	 */
+	public static void getUniqueIndex(Problem[] probs) {
+		if (probs == null) {
+			return;
+		}
+		Set<Integer> indexSet = new HashSet<Integer>();
+		for (int i = 0; i < probs.length; i++) {
+			Problem prob = probs[i];
+			for (int j = 0; j < prob.l; j++) {
+				for (DataPoint dp : prob.x[j]) {
+					indexSet.add(dp.index);
+				}
+			}
+		}
+		
+		int index = 0;
+		int[] indexs = new int[indexSet.size()];
+		Iterator<Integer> it = indexSet.iterator();
+		while (it.hasNext()) {
+			indexs[index++] = it.next();
+		}
+		Arrays.sort(indexs);
+		
+		Map<Integer, Integer> oldToNew = new HashMap<Integer, Integer>();
+		for (int i = 0; i < indexs.length; i++) {
+			oldToNew.put(indexs[i], i+1);
+		} 
+		
+		for (int i = 0; i < probs.length; i++) {
+			Problem prob = probs[i];
+			for (int j = 0; j < prob.l; j++) {
+				for (DataPoint dp : prob.x[j]) {
+					dp.index = oldToNew.get(dp.index);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 将样本写入文件
+	 * @throws IOException 
+	 */
+	public static void writeProbToFile(Problem prob, String filename) throws IOException {
+		if (prob == null) {
+			return;
+		}
+		BufferedWriter out = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(filename)));
+		for (int i = 0; i < prob.l; i++) {
+			StringBuffer sb = new StringBuffer();
+			int[] label = prob.y[i];
+			DataPoint[] x = prob.x[i];
+			for (int j = 0; j < label.length; j++) {
+				sb.append(label[j]);
+				if (j == label.length - 1) {
+					sb.append(" ");
+				} else {
+					sb.append(",");
+				}
+			}
+			
+			for (DataPoint d : x) {
+				sb.append(d.index + ":" + d.value + " ");
+			}
+			sb.append("\n");
+			out.write(sb.toString());
+		}
+		out.close();
 	}
 }

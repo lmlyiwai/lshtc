@@ -1,5 +1,6 @@
 package com.hunag.dmoz;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -10,16 +11,21 @@ public class FileIOTest {
 
 	@Test
 	public void test() throws IOException {
-//		String filename = "F:\\DataSets\\Dmoz\\dmoz2010_large\\dry-run_lshtc_dataset\\Task1_Train_CrawlData_Test_CrawlData"
-//				+ "\\validation.txt";
-//		String valid = "F:\\DataSets\\dmoz2010\\validation.txt";
-//		String[] content = FileIO.readFile(filename);
-//		String[][] lines = FileIO.parseContent(content, true);
-//		FileIO.writeStringToFile(valid, lines);
+		String trainfile = "F:\\DataSets\\dmoz2010\\train.txt";
+		String testfile = "F:\\DataSets\\dmoz2010\\test.txt";
+		String validfile = "F:\\DataSets\\dmoz2010\\validation.txt";
 		
-		String filename = "F:\\DataSets\\dmoz2010\\validation.txt";
-		Problem prob = FileIO.readProblem(filename,  -1);
-		System.out.println(prob.l + " " + prob.n + " " + prob.bias);
+		Problem train = FileIO.readProblem(trainfile, -1);
+		Problem test = FileIO.readProblem(testfile, -1);
+		Problem valid = FileIO.readProblem(validfile, -1);
+		
+		Problem[] probs = {train, test, valid};
+		String ntrainfile = "F:\\DataSets\\dmoz2010\\newDmoz\\train.txt";
+		String ntestfile = "F:\\DataSets\\dmoz2010\\newDmoz\\test.txt";
+		String nvalidfile = "F:\\DataSets\\dmoz2010\\newDmoz\\validation.txt";
+		FileIO.writeProbToFile(train, ntrainfile);
+		FileIO.writeProbToFile(test, ntestfile);
+		FileIO.writeProbToFile(valid, nvalidfile);
 	}
 
 }
