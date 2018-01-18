@@ -6,7 +6,15 @@
  */
 package com.hunag.dmoz;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.fileInputOutput.Problem;
 import com.refinedExpert.Tools;
@@ -129,14 +137,14 @@ System.out.println(label);
 	/**
 	 * 简略预测，TopN个标签中是否包含真实类别
 	 */
-	public void predict(Problem test) {
+	public void predict(Problem test, int[] ks) {
 		if (test == null) {
 			return;
 		}
-		double count = 0;
-		System.out.print("n = " + this.topn);
+		
+		double[] count = new double[ks.length];
 		for (int i = 0; i < test.l; i++) {
-//System.out.print(i);
+System.out.print(i);
 long start = System.currentTimeMillis();
 			normalizeTF(test.x[i]);
 			double[] cos = new double[this.classCenters.length];
@@ -144,19 +152,68 @@ long start = System.currentTimeMillis();
 				cos[j] = cosine(test.x[i], this.classCenters[j]);
 			}
 			int[] index = Sort.getIndexBeforeSort(cos);
-			int[] topnlabel = new int[this.topn];
-			for (int j = 0; j < this.topn; j++) {
-				topnlabel[j] = this.ulabels[index[j]];
-			}
-			if(Tools.isContain(topnlabel, test.y[i][0])) {
-				count++;
+			for (int m = 0; m < ks.length; m++) {
+				int[] topnlabel = new int[ks[m]];
+				int base = index.length - ks[m];
+				for (int j = base; j < index.length; j++) {
+					topnlabel[j-base] = this.ulabels[index[j]];
+				}
+				if (Tools.isContain(topnlabel, test.y[i][0])) {
+					count[m] += 1;
+				}
 			}
 long end = System.currentTimeMillis();
-//System.out.println(", time = " + (end - start));
+System.out.println(", time = " + (end - start));
 		}
-		System.out.println(", accuracy = " + (count / test.l));
+		for (int i = 0; i < ks.length; i++) {
+			System.out.println("n = " + ks[i] + ", accuracy = " + (count[i] / test.l));
+		}
 	}
 
+	/**
+	 * 简略预测，TopN个标签中是否包含真实类别
+	 * @throws IOException 
+	 */
+	public void predict(Problem test) throws IOException {
+		if (test == null) {
+			return;
+		}
+		
+		double count = 0;
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for (int i = 0; i < test.l; i++) {
+System.out.print(i);
+long start = System.currentTimeMillis();
+			normalizeTF(test.x[i]);
+			double[] cos = new double[this.classCenters.length];
+			for (int j = 0; j < this.classCenters.length; j++) {
+				cos[j] = cosine(test.x[i], this.classCenters[j]);
+			}
+			int[] index = Sort.getIndexBeforeSort(cos);
+			for (int j = 0; j < index.length; j++) {
+				int idx = index.length - 1 - j;
+				if (this.ulabels[index[idx]] == test.y[i][0]) {
+					count += j;
+					addMap(map, (j+1));
+					System.out.println(", sort = " + (j+1));
+					break;
+				}
+			}
+long end = System.currentTimeMillis();
+		}
+		System.out.println("Average rank " + (count / test.l));
+		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+				new FileOutputStream("statics" + this.topn + ".txt"))) ;
+		Set<Integer> set = map.keySet();
+		Iterator<Integer> it = set.iterator();
+		while (it.hasNext()) {
+			int key = it.next();
+			int value = map.get(key);
+			out.write(key + ":" + value + "\n");
+		}
+		out.close();
+	}
+	
 	public int getTopn() {
 		return topn;
 	}
@@ -165,4 +222,71 @@ long end = System.currentTimeMillis();
 		this.topn = topn;
 	}
 	
+	private void addMap(Map<Integer, Integer> map, int key) {
+		if (map == null) {
+			return;
+		}
+		if (map.containsKey(key)) {
+			int value = map.get(key);
+			value = value + 1;
+			map.put(key, value);
+		} else {
+			map.put(key, 1);
+		}
+	}
+	
+	/**
+	 * 统计样本集中每个类样本数目
+	 * @throws IOException 
+	 */
+	public void statisticNumOfeachClass(Problem prob, String outfile) throws IOException {
+		if (prob == null) {
+			return;
+		}
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for (int i = 0; i < prob.l; i++) {
+			for (int j = 0; j < prob.y[i].length; j++) {
+				addMap(map, prob.y[i][j]);
+			}
+		}
+		BufferedWriter out = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(outfile)));
+		Set<Integer> set = map.keySet();
+		Iterator<Integer> it = set.iterator();
+		while (it.hasNext()) {
+			int key = it.next();
+			int value = map.get(key);
+			out.write(key + ":" + value + "\n");
+		}
+		out.close();
+	}
+	
+	/**
+	 * @param extend为true时给每个样本添加一维偏置
+	 */
+	public void transformSamples(Problem prob, boolean extend) {
+		if (prob == null) {
+			return;
+		}
+		for (int i = 0; i < prob.l; i++) {
+			normalizeTF(prob.x[i]);
+			double[] cos = new double[this.classCenters.length];
+			for (int j = 0; j < this.classCenters.length; j++) {
+				cos[j] = cosine(this.classCenters[j], prob.x[i]);
+			}
+			int[] idx = Sort.getIndexBeforeSort(cos);
+			int dim = this.topn;
+			if (extend) {
+				dim = dim + 1;
+			}
+			DataPoint[] dp = new DataPoint[dim];
+			for (int j = 0; j < this.topn; j++) {
+				int index = idx[idx.length - 1 - j] + 1;
+				double value = cos[idx[idx.length - 1 - j]];
+				dp[j] = new DataPoint(index, value);
+			}
+			dp[dim-1] = new DataPoint(this.classCenters.length + 1, 1);
+			prob.x[i] = dp;
+		}
+	}
 }
