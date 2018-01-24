@@ -1,8 +1,0 @@
-/bin/
-/lib/
-/RCV1RCV2/
-.gitignore
-.project
-*.iml
-.idea/
-.settings/
