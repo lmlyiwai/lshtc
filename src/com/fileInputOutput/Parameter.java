@@ -1,55 +1,55 @@
 package com.fileInputOutput;
 
 public class Parameter {
-	
-	private double 	C;
-	private int 		maxIteration;
-	private double 	eps;
-	private double C1;
-	
-	public Parameter(double C, int maxIteration, double eps) {
-		this.C = C;
-		this.maxIteration = maxIteration;
-		this.eps = eps;
-	}
 
-	public Parameter(double C, double C1, int maxIteration, double eps) {
-		this.C = C;
-		this.C1 = C1;
-		this.maxIteration = maxIteration;
-		this.eps = eps;
-	}
-	
-	public double getC() {
-		return C;
-	}
+    private double C;
+    private int maxIteration;
+    private double eps;
+    private double C1;
 
-	public void setC(double c) {
-		C = c;
-	}
+    public Parameter(double C, int maxIteration, double eps) {
+        this.C = C;
+        this.maxIteration = maxIteration;
+        this.eps = eps;
+    }
 
-	public int getMaxIteration() {
-		return maxIteration;
-	}
+    public Parameter(double C, double C1, int maxIteration, double eps) {
+        this.C = C;
+        this.C1 = C1;
+        this.maxIteration = maxIteration;
+        this.eps = eps;
+    }
 
-	public void setMaxIteration(int maxIteration) {
-		this.maxIteration = maxIteration;
-	}
+    public double getC() {
+        return C;
+    }
 
-	public double getEps() {
-		return eps;
-	}
+    public void setC(double c) {
+        C = c;
+    }
 
-	public void setEps(double eps) {
-		this.eps = eps;
-	}
+    public int getMaxIteration() {
+        return maxIteration;
+    }
 
-	public double getC1() {
-		return C1;
-	}
+    public void setMaxIteration(int maxIteration) {
+        this.maxIteration = maxIteration;
+    }
 
-	public void setC1(double c1) {
-		C1 = c1;
-	}
+    public double getEps() {
+        return eps;
+    }
+
+    public void setEps(double eps) {
+        this.eps = eps;
+    }
+
+    public double getC1() {
+        return C1;
+    }
+
+    public void setC1(double c1) {
+        C1 = c1;
+    }
 
 }
