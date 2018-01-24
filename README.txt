@@ -9,5 +9,6 @@ trainStatistic.txt
 163843:13表示163843类有13个样本
 
 validStatistic.txt
+\fdasafdsdfas
 统计了确认集中每类样本数量
-吕梦雷
+吕梦雷leileileilei
